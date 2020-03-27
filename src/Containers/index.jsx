@@ -6,14 +6,14 @@ import {
   Toolbar,
   DateNavigator,
   Appointments,
-  AppointmentTooltip
+  AppointmentTooltip,
+  TodayButton
 } from "@devexpress/dx-react-scheduler-material-ui";
 import {
   MonthView,
   WeekView,
   DayView
 } from "@devexpress/dx-react-scheduler-material-ui";
-import { CalendarNavigation } from "./CalendarNavigation";
 import Button from "@material-ui/core/Button";
 import { Grid } from "@material-ui/core";
 
@@ -45,6 +45,21 @@ const data = [
   }
 ];
 
+const btnNav = [
+  {
+    color: "primary",
+    name: "Today"
+  },
+  {
+    color: "secondary",
+    name: "Back"
+  },
+  {
+    color: "secondary",
+    name: "Next"
+  }
+];
+
 const periods = ["Month", "Week", "Day", "Agenda"];
 const useStyles = makeStyles(theme => ({
   root: {
@@ -58,10 +73,15 @@ export function Calendar() {
   const classes = useStyles();
 
   const [value, setValue] = useState("Month");
+  const [currentData, setCurrentData] = useState("2020-03-27");
 
   const onChangeValue = value => {
     setValue(value);
     console.log(value);
+  };
+
+  const onCurrentDateChange = currentDate => {
+    setCurrentData(currentData);
   };
 
   return (
@@ -73,14 +93,13 @@ export function Calendar() {
         justify="space-between"
         alignItems="center"
       >
-        <CalendarNavigation />
         <div>
-          {periods.map(period => (
+          {periods.map((period, index) => (
             <Button
               variant="contained"
               color="primary"
+              key={index}
               onClick={() => {
-                // debugger;
                 onChangeValue(period);
               }}
               value={period}
@@ -92,17 +111,15 @@ export function Calendar() {
       </Grid>
 
       <Scheduler data={data}>
-        
-
-        <ViewState
-          currentDate="2020-03-27"
-          onCurrentDateChange={() => console.log(1)}
-        />
+      <ViewState onClick={onCurrentDateChange} />
         {value === "Week" && <WeekView />}
         {value === "Month" && <MonthView />}
         {value === "Day" && <DayView />}
-        <Toolbar />
-        <DateNavigator />
+          <Toolbar />
+          <DateNavigator>
+            <navigatorText>Bacj</navigatorText>
+          </DateNavigator>
+          <TodayButton />
         <Appointments />
         <AppointmentTooltip />
       </Scheduler>
