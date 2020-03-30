@@ -1,12 +1,14 @@
-import React, { useState } from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import { ViewState } from "@devexpress/dx-react-scheduler";
+import React from "react";
+// import { makeStyles } from "@material-ui/core/styles";
+import { withStyles } from "@material-ui/core/styles";
+import { ViewState, DateNavigator } from "@devexpress/dx-react-scheduler";
+import { fade } from "@material-ui/core/styles/colorManipulator";
 import {
   Scheduler,
   Toolbar,
-  DateNavigator,
   Appointments,
   AppointmentTooltip,
+  AppointmentForm,
   TodayButton
 } from "@devexpress/dx-react-scheduler-material-ui";
 import {
@@ -14,8 +16,23 @@ import {
   WeekView,
   DayView
 } from "@devexpress/dx-react-scheduler-material-ui";
-import Button from "@material-ui/core/Button";
-import { Grid } from "@material-ui/core";
+import { Paper, Tabs, Tab, Grid, Button } from "@material-ui/core";
+
+// const CustomNavigationButtonBase = props => {
+//   return <DateNavigator.NavigationButton {...props} className="btnNav"/>;
+// };
+
+// const style = theme => ({
+//   btnNav: {
+//     backgroundColor: 'red',
+//     '&:hover': {
+//       backgroundColor: fade(theme.palette.primary.main, 0.14),
+//     },
+//     '&:focus': {
+//       backgroundColor: fade(theme.palette.primary.main, 0.16),
+//     },
+//   },
+// });
 
 const data = [
   {
@@ -27,102 +44,56 @@ const data = [
     startDate: "2020-03-12 10:00",
     endDate: "2020-03-12 12:00",
     title: "Watching"
-  },
-  {
-    startDate: "2020-03-12 10:00",
-    endDate: "2020-03-12 12:00",
-    title: "Shopping"
-  },
-  {
-    startDate: "2020-03-15 18:00",
-    endDate: "2020-03-15 19:00",
-    title: "Go to a gym"
-  },
-  {
-    startDate: "2020-03-26 18:00",
-    endDate: "2020-03-27 19:00",
-    title: "Go to a home"
   }
 ];
 
-const btnNav = [
-  {
-    color: "primary",
-    name: "Today"
-  },
-  {
-    color: "secondary",
-    name: "Back"
-  },
-  {
-    color: "secondary",
-    name: "Next"
-  }
-];
+// const useStyles = makeStyles(theme => ({
+//   root: {
+//     width: "auro",
+//     minHeight: "100vh",
+//     backgroundColor: "#f2f3f4"
+//   }
+// }));
 
-const periods = ["Month", "Week", "Day", "Agenda"];
-const useStyles = makeStyles(theme => ({
-  root: {
-    width: "auro",
-    minHeight: "100vh",
-    backgroundColor: "#f2f3f4"
-  }
-}));
+// const CustomNavigationButton = withStyles(style, { name: 'DayScaleCell' })(CustomNavigationButtonBase);
 
 export function Calendar() {
-  const classes = useStyles();
+  // const classes = useStyles();
 
-  const [value, setValue] = useState("Month");
-  const [currentData, setCurrentData] = useState("2020-03-27");
-
-  const onChangeValue = value => {
-    setValue(value);
-    console.log(value);
-  };
-
-  const onCurrentDateChange = currentDate => {
-    setCurrentData(currentData);
+  const [value, setValue] = React.useState("Month");
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
   };
 
   return (
-    <div className={classes.root}>
-      <h2>Calendar</h2>
-      <Grid
-        container
-        direction="row"
-        justify="space-between"
-        alignItems="center"
-      >
-        <div>
-          {periods.map((period, index) => (
-            <Button
-              variant="contained"
-              color="primary"
-              key={index}
-              onClick={() => {
-                onChangeValue(period);
-              }}
-              value={period}
-            >
-              {period}
-            </Button>
-          ))}
-        </div>
-      </Grid>
+    <Paper>
+      <Scheduler height={660} data={data}>
+        <Button>Create event</Button>
+        <Grid container direction="row" justify="space-between">
+          <Tabs
+            value={value}
+            onChange={handleChange}
+            indicatorColor="primary"
+            textColor="primary"
+            centered
+          >
+            <Tab label="Day" value="Day" />
+            <Tab label="Week" value="Week" />
+            <Tab label="Month" value="Month" />
+          </Tabs>
+        </Grid>
 
-      <Scheduler data={data}>
-      <ViewState onClick={onCurrentDateChange} />
-        {value === "Week" && <WeekView />}
-        {value === "Month" && <MonthView />}
-        {value === "Day" && <DayView />}
-          <Toolbar />
-          <DateNavigator>
-            <navigatorText>Bacj</navigatorText>
-          </DateNavigator>
-          <TodayButton />
-        <Appointments />
-        <AppointmentTooltip />
+        <ViewState defaultCurrentViewName="Month" currentViewName={value} />
+        <DayView />
+        <WeekView />
+        <MonthView />
+        <Toolbar />
+        {/* <DateNavigator navigationButtonComponent={CustomNavigationButton} /> */}
+        <TodayButton />
+        <Appointments onChange={()=> console.log(1)}/>
+        <AppointmentTooltip showCloseButton showOpenButton />
+        <AppointmentForm />
       </Scheduler>
-    </div>
+    </Paper>
   );
 }
