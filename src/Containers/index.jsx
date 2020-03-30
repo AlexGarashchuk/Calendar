@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
+import './style.css';
+import ReactDOM from 'react-dom';
 // import { makeStyles } from "@material-ui/core/styles";
 import { withStyles } from "@material-ui/core/styles";
-import { ViewState, DateNavigator } from "@devexpress/dx-react-scheduler";
+import { ViewState } from "@devexpress/dx-react-scheduler";
 import { fade } from "@material-ui/core/styles/colorManipulator";
 import {
   Scheduler,
@@ -9,7 +11,8 @@ import {
   Appointments,
   AppointmentTooltip,
   AppointmentForm,
-  TodayButton
+  TodayButton,
+  DateNavigator
 } from "@devexpress/dx-react-scheduler-material-ui";
 import {
   MonthView,
@@ -18,21 +21,22 @@ import {
 } from "@devexpress/dx-react-scheduler-material-ui";
 import { Paper, Tabs, Tab, Grid, Button } from "@material-ui/core";
 
-// const CustomNavigationButtonBase = props => {
-//   return <DateNavigator.NavigationButton {...props} className="btnNav"/>;
-// };
+const CustomNavigationButtonBase = props => {
+ 
+  return <DateNavigator.NavigationButton {...props} className="btnNav"/>;
+};
 
-// const style = theme => ({
-//   btnNav: {
-//     backgroundColor: 'red',
-//     '&:hover': {
-//       backgroundColor: fade(theme.palette.primary.main, 0.14),
-//     },
-//     '&:focus': {
-//       backgroundColor: fade(theme.palette.primary.main, 0.16),
-//     },
-//   },
-// });
+const style = theme => ({
+  btnNav: {
+    width: 230,
+    // '&:hover': {
+    //   backgroundColor: fade(theme.palette.primary.main, 0.14),
+    // },
+    '&:focus': {
+      backgroundColor: '#000',
+    },
+  },
+});
 
 const data = [
   {
@@ -55,7 +59,20 @@ const data = [
 //   }
 // }));
 
-// const CustomNavigationButton = withStyles(style, { name: 'DayScaleCell' })(CustomNavigationButtonBase);
+function MyElement(){
+  return(
+    <div>
+      <Scheduler>
+      <Appointments onChange={()=> console.log(1)}/>
+      <AppointmentTooltip visible showCloseButton showOpenButton />
+      </Scheduler>
+     
+    </div>
+  )
+
+}
+
+const CustomNavigationButton = withStyles(style, { name: 'DayScaleCell' })(CustomNavigationButtonBase);
 
 export function Calendar() {
   // const classes = useStyles();
@@ -65,11 +82,29 @@ export function Calendar() {
     setValue(newValue);
   };
 
+  const [anchorEl, setAnchorEl] = React.useState(false);
+
+  const handleClick = (event) => {
+    console.log(1)
+    setAnchorEl(!anchorEl);
+  };
+
+  // const handleClose = () => {
+  //   setAnchorEl(null);
+  // };
+
+
+
   return (
     <Paper>
       <Scheduler height={660} data={data}>
-        <Button>Create event</Button>
-        <Grid container direction="row" justify="space-between">
+        <Button onClick={handleClick} anchorEl={anchorEl}>Create event</Button>
+        <Grid 
+        container
+        direction="row"
+        justify="flex-end"
+        alignItems="flex-end"
+        >
           <Tabs
             value={value}
             onChange={handleChange}
@@ -88,10 +123,20 @@ export function Calendar() {
         <WeekView />
         <MonthView />
         <Toolbar />
-        {/* <DateNavigator navigationButtonComponent={CustomNavigationButton} /> */}
+        <DateNavigator navigationButtonComponent={CustomNavigationButton} />
         <TodayButton />
         <Appointments onChange={()=> console.log(1)}/>
         <AppointmentTooltip showCloseButton showOpenButton />
+        {/* {anchorEl? 
+         <div>
+         <Appointments onChange={()=> console.log(1)}/>
+         <AppointmentTooltip visible showCloseButton showOpenButton />
+         <AppointmentForm
+            readOnly
+          />
+       </div> : false
+        } */}
+       
         <AppointmentForm />
       </Scheduler>
     </Paper>
