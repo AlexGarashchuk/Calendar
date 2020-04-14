@@ -1,10 +1,25 @@
-import React, { useState } from "react";
-import './style.css';
-import ReactDOM from 'react-dom';
-// import { makeStyles } from "@material-ui/core/styles";
-import { withStyles } from "@material-ui/core/styles";
-import { ViewState } from "@devexpress/dx-react-scheduler";
-import { fade } from "@material-ui/core/styles/colorManipulator";
+import React from "react";
+import {useStyles} from "./style";
+import {  withStyles } from "@material-ui/core/styles";
+import {AppointmentFormContainer} from "./AppointmentForm"
+
+import {
+  Paper,
+  Tabs,
+  Tab,
+  Grid,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Fab,
+} from "@material-ui/core";
+
+import AddIcon from "@material-ui/icons/Add";
+
+import { ViewState, EditingState } from "@devexpress/dx-react-scheduler";
 import {
   Scheduler,
   Toolbar,
@@ -12,70 +27,50 @@ import {
   AppointmentTooltip,
   AppointmentForm,
   TodayButton,
-  DateNavigator
-} from "@devexpress/dx-react-scheduler-material-ui";
-import {
+  DateNavigator,
+  AllDayPanel,
+  EditRecurrenceMenu,
+  DragDropProvider,
   MonthView,
   WeekView,
   DayView
 } from "@devexpress/dx-react-scheduler-material-ui";
-import { Paper, Tabs, Tab, Grid, Button } from "@material-ui/core";
+
+import { appointments } from "../data/data";
+
+
 
 const CustomNavigationButtonBase = props => {
- 
-  return <DateNavigator.NavigationButton {...props} className="btnNav"/>;
+  return <DateNavigator.NavigationButton {...props} className="btnNav" />;
 };
 
-const style = theme => ({
-  btnNav: {
-    width: 230,
-    // '&:hover': {
-    //   backgroundColor: fade(theme.palette.primary.main, 0.14),
-    // },
-    '&:focus': {
-      backgroundColor: '#000',
-    },
-  },
-});
+const cancelDelete = () => {
+  console.log("i close the dialog");
+};
 
-const data = [
-  {
-    startDate: "2020-03-12 10:00",
-    endDate: "2020-03-12 12:00",
-    title: "Meeting"
-  },
-  {
-    startDate: "2020-03-12 10:00",
-    endDate: "2020-03-12 12:00",
-    title: "Watching"
-  }
-];
+const toggleConfirmationVisable = () => {
+  console.log("toggle confirmation visable");
+};
 
-// const useStyles = makeStyles(theme => ({
-//   root: {
-//     width: "auro",
-//     minHeight: "100vh",
-//     backgroundColor: "#f2f3f4"
-//   }
-// }));
+const commitDeleteAppointment = () => {
+  console.log("Commit delete appointment");
+};
 
-function MyElement(){
-  return(
-    <div>
-      <Scheduler>
-      <Appointments onChange={()=> console.log(1)}/>
-      <AppointmentTooltip visible showCloseButton showOpenButton />
-      </Scheduler>
-     
-    </div>
-  )
+const toggleEditingFormVisibility = () => {
+  console.log("toggle Editing Form Visibility");
+};
 
-}
+const onEditingAppointmentChange = () => {
+  console.log("on editing appointment change");
+};
 
-const CustomNavigationButton = withStyles(style, { name: 'DayScaleCell' })(CustomNavigationButtonBase);
+const CustomNavigationButton = withStyles(useStyles, { name: "DayScaleCell" })(
+  CustomNavigationButtonBase
+);
 
-export function Calendar() {
-  // const classes = useStyles();
+
+export const Calendar = () => {
+  const classes = useStyles();
 
   const [value, setValue] = React.useState("Month");
   const handleChange = (event, newValue) => {
@@ -84,26 +79,24 @@ export function Calendar() {
 
   const [anchorEl, setAnchorEl] = React.useState(false);
 
-  const handleClick = (event) => {
-    console.log(1)
+  const handleClick = event => {
     setAnchorEl(!anchorEl);
   };
 
-  // const handleClose = () => {
-  //   setAnchorEl(null);
-  // };
-
+  const [state, setState] = React.useState({ editingFormVisible: false });
+  const updateState = state => {
+    setState(state);
+  };
 
 
   return (
     <Paper>
-      <Scheduler height={660} data={data}>
-        <Button onClick={handleClick} anchorEl={anchorEl}>Create event</Button>
-        <Grid 
-        container
-        direction="row"
-        justify="flex-end"
-        alignItems="flex-end"
+      <Scheduler height={660} data={appointments}>
+        <Grid
+          container
+          direction="row"
+          justify="flex-end"
+          alignItems="flex-end"
         >
           <Tabs
             value={value}
@@ -119,26 +112,54 @@ export function Calendar() {
         </Grid>
 
         <ViewState defaultCurrentViewName="Month" currentViewName={value} />
-        <DayView />
+        <EditingState />
+        <DayView startDayHour="6" />
         <WeekView />
         <MonthView />
+        <AllDayPanel />
+        <EditRecurrenceMenu />
+        <Appointments onChange={() => console.log(1)} />
+        <AppointmentTooltip showCloseButton showOpenButton showDeleteButton />
         <Toolbar />
         <DateNavigator navigationButtonComponent={CustomNavigationButton} />
         <TodayButton />
-        <Appointments onChange={()=> console.log(1)}/>
-        <AppointmentTooltip showCloseButton showOpenButton />
-        {/* {anchorEl? 
-         <div>
-         <Appointments onChange={()=> console.log(1)}/>
-         <AppointmentTooltip visible showCloseButton showOpenButton />
-         <AppointmentForm
-            readOnly
-          />
-       </div> : false
-        } */}
-       
-        <AppointmentForm />
+
+        <AppointmentForm
+          overlayComponent={() => AppointmentFormContainer(state)}
+          // visible={false}
+          onVisibilityChange={toggleEditingFormVisibility}
+        />
+        <DragDropProvider />
       </Scheduler>
+
+      <Dialog open={false} onClose={() => cancelDelete}>
+        <DialogTitle> Delete Appointment</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {" "}
+            Are you sure you want to delete this appointment?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={toggleConfirmationVisable} color="primary">
+            Cancel
+          </Button>
+        </DialogActions>
+        <DialogActions>
+          <Button onClick={commitDeleteAppointment} color="secondary">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Fab
+        color="secondary"
+        className={classes.addButton}
+        onClick={() => updateState({ editingFormVisible: true })}
+        // onClick={() => console.log("Open update form")}
+      >
+        <AddIcon />
+      </Fab>
     </Paper>
   );
 }
